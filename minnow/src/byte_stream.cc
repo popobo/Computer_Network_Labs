@@ -4,74 +4,77 @@
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream( uint64_t capacity ) : 
+    capacity_( capacity ), bytes_{}
+{}
 
 void Writer::push( string data )
 {
-  // Your code here.
-  (void)data;
+  uint64_t capacity_left = capacity_ - bytes_.size();
+  uint64_t push_len = data.size() > capacity_left ? capacity_left : data.size();
+  
+  if (0 == push_len)
+    return;
+
+  bytes_.insert(bytes_.end(), data.begin(), data.begin() + push_len);
+  bytes_pushed_ += push_len;
 }
 
 void Writer::close()
 {
-  // Your code here.
+  is_closed_ = true;
 }
 
 void Writer::set_error()
 {
-  // Your code here.
+  is_error_ = true;
 }
 
 bool Writer::is_closed() const
 {
-  // Your code here.
-  return {};
+  return is_closed_;
 }
 
 uint64_t Writer::available_capacity() const
 {
-  // Your code here.
-  return {};
+  return capacity_ - bytes_.size();
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-  // Your code here.
-  return {};
+  return bytes_pushed_;
 }
 
-string_view Reader::peek() const
+string Reader::peek() const
 {
-  // Your code here.
-  return {};
+  return string{bytes_.begin(), bytes_.end()};
 }
 
 bool Reader::is_finished() const
 {
-  // Your code here.
-  return {};
+  return is_closed_ && bytes_.size() == 0;
 }
 
 bool Reader::has_error() const
 {
-  // Your code here.
-  return {};
+  return is_error_;
 }
 
 void Reader::pop( uint64_t len )
 {
-  // Your code here.
-  (void)len;
+  uint64_t pop_len = len > bytes_.size() ? bytes_.size() : len;
+  if (0 == pop_len)
+    return;
+  bytes_.erase(bytes_.begin(), bytes_.begin() + pop_len);
+  bytes_poped_ += pop_len;
 }
 
 uint64_t Reader::bytes_buffered() const
 {
-  // Your code here.
-  return {};
+  return bytes_.size();
 }
 
 uint64_t Reader::bytes_popped() const
 {
-  // Your code here.
-  return {};
+  return bytes_poped_;
 }
