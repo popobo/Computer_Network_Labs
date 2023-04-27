@@ -39,37 +39,9 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   {
     return;
   }
-
-  if (f_uasm_i_ == first_index)
-  {
-    bool need_close = is_last_substring;
-    
-    f_uasm_i_ += data.size();
-    output.push(std::move(data));
-    
-    for (auto it = segments_.begin(); it != segments_.end();)
-    {
-      if (f_uasm_i_ != it->first_index)
-      {
-        break;
-      }
-
-      f_uasm_i_ += it->data.size();
-      output.push(std::move(it->data));
-      need_close = it->is_last_substring;
-
-      it = segments_.erase(it);
-    }
-    
-    if (need_close)
-    {
-      output.close();
-    }
-    return;
-  }
   
   auto it = segments_.begin();
-  for (; it != segments_.end(); ++it)
+  for (; it != segments_.end();)
   {
     // deal with the overlapped substring
     uint64_t it_l_i_d = it->first_index + it->data.size() - 1;
@@ -85,17 +57,53 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
       break;
     }
 
+    if (first_index <= it->first_index && 
+        it_l_i_d <= l_i_d)
+    {
+      it = segments_.erase(it);
+      continue;
+    }
+
     if (l_i_d < it->first_index)
     {
       segments_.insert(it, {first_index, is_last_substring, std::move(data)});
       break;
     }
+
+    if (first_index <= it_l_i_d &&
+        it_l_i_d < l_i_d)
+    {
+      data = data.substr(it_l_i_d - first_index + 1);
+      first_index = it_l_i_d + 1;
+      segments_.insert(++it, {first_index, is_last_substring, std::move(data)});
+      break;
+    }
+
+    ++it;
   }
 
   if (segments_.end() == it)
   {
     segments_.push_back({first_index, is_last_substring, std::move(data)});
   }
+  
+  for (it = segments_.begin(); it != segments_.end();)
+  {
+    if (it->first_index != f_uasm_i_)
+    {
+      break;
+    }
+
+    f_uasm_i_ += it->data.size();
+    output.push(std::move(it->data));
+    if (it->is_last_substring)
+    {
+      output.close();
+    }
+    it = segments_.erase(it);
+  }
+
+  
 }
 
 uint64_t Reassembler::bytes_pending() const
