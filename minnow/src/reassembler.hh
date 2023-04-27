@@ -3,6 +3,7 @@
 #include "byte_stream.hh"
 
 #include <string>
+#include <list>
 
 class Reassembler
 {
@@ -31,4 +32,14 @@ public:
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
+
+private:
+    struct segment 
+    {
+        uint64_t first_index = 0;
+        bool is_last_substring = false;
+        std::string data{};
+    };
+    uint64_t f_uasm_i_ = 0; 
+    std::list<segment> segments_{};
 };
