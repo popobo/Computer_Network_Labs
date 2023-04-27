@@ -75,7 +75,7 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     {
       data = data.substr(it_l_i_d - first_index + 1);
       first_index = it_l_i_d + 1;
-      segments_.insert(++it, {first_index, is_last_substring, std::move(data)});
+      segments_.insert(next(it), {first_index, is_last_substring, std::move(data)});
       break;
     }
 
