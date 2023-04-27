@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring, Writer& output )
+void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writer& output )
 {
   if (data.empty())
   {
@@ -15,24 +15,24 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   //first unacceptable index
   uint64_t f_uacp_i = f_uasm_i_ + output.available_capacity();
   // last index of data
-  uint64_t l_i_d = first_index + data.size() - 1;
+  uint64_t lid = fi + data.size() - 1;
   // discard any bytes that lie beyond the stream's available capacity
   // or are already assembled
-  if (l_i_d < f_uasm_i_)
+  if (lid < f_uasm_i_)
   {
     return;
   }
 
-  if (l_i_d >= f_uacp_i)
+  if (lid >= f_uacp_i)
   {
-    data.resize(f_uacp_i - first_index);
-    l_i_d = f_uacp_i - 1;
+    data.resize(f_uacp_i - fi);
+    lid = f_uacp_i - 1;
   }
 
-  if (first_index < f_uasm_i_)
+  if (fi < f_uasm_i_)
   {
-    data = data.substr(f_uasm_i_ - first_index);
-    first_index = f_uasm_i_;
+    data = data.substr(f_uasm_i_ - fi);
+    fi = f_uasm_i_;
   }
 
   if (data.empty())
@@ -44,38 +44,39 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   for (; it != segments_.end();)
   {
     // deal with the overlapped substring
-    uint64_t it_l_i_d = it->first_index + it->data.size() - 1;
-    if (it->first_index <= l_i_d &&
-        l_i_d <= it_l_i_d)
+    uint64_t it_fi = it->fi;
+    uint64_t it_lid = it_fi + it->data.size() - 1;
+    if (it_fi <= lid &&
+        lid <= it_lid)
     {
-      if (it->first_index <= first_index)
+      if (it_fi <= fi)
       {
         break;
       }
-      data.resize(it->first_index - first_index);
-      segments_.insert(it, {first_index, is_last_substring, std::move(data)});
+      data.resize(it_fi - fi);
+      segments_.insert(it, {fi, is_last_substring, std::move(data)});
       break;
     }
 
-    if (first_index <= it->first_index && 
-        it_l_i_d <= l_i_d)
+    if (fi <= it_fi && 
+        it_lid <= lid)
     {
       it = segments_.erase(it);
       continue;
     }
 
-    if (l_i_d < it->first_index)
+    if (lid < it_fi)
     {
-      segments_.insert(it, {first_index, is_last_substring, std::move(data)});
+      segments_.insert(it, {fi, is_last_substring, std::move(data)});
       break;
     }
 
-    if (first_index <= it_l_i_d &&
-        it_l_i_d < l_i_d)
+    if (fi <= it_lid &&
+        it_lid < lid)
     {
-      data = data.substr(it_l_i_d - first_index + 1);
-      first_index = it_l_i_d + 1;
-      segments_.insert(next(it), {first_index, is_last_substring, std::move(data)});
+      data = data.substr(it_lid - fi + 1);
+      fi = it_lid + 1;
+      segments_.insert(next(it), {fi, is_last_substring, std::move(data)});
       break;
     }
 
@@ -84,12 +85,12 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
 
   if (segments_.end() == it)
   {
-    segments_.push_back({first_index, is_last_substring, std::move(data)});
+    segments_.push_back({fi, is_last_substring, std::move(data)});
   }
   
   for (it = segments_.begin(); it != segments_.end();)
   {
-    if (it->first_index != f_uasm_i_)
+    if (it->fi != f_uasm_i_)
     {
       break;
     }

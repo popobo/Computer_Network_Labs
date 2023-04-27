@@ -28,7 +28,7 @@ public:
    *
    * The Reassembler should close the stream after writing the last byte.
    */
-  void insert( uint64_t first_index, std::string data, bool is_last_substring, Writer& output );
+  void insert( uint64_t fi, std::string data, bool is_last_substring, Writer& output );
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
@@ -36,7 +36,7 @@ public:
 private:
     struct segment 
     {
-        uint64_t first_index = 0;
+        uint64_t fi = 0;
         bool is_last_substring = false;
         std::string data{};
     };
