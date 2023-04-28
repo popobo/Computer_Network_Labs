@@ -13,7 +13,9 @@ using namespace std;
 static constexpr size_t NREPS = 32;
 static constexpr size_t NSEGS = 128;
 static constexpr size_t MAX_SEG_LEN = 2048;
-
+// static constexpr size_t NREPS = 5000;
+// static constexpr size_t NSEGS = 16;
+// static constexpr size_t MAX_SEG_LEN = 512;
 int main()
 {
   try {
@@ -36,9 +38,13 @@ int main()
       string d( offset, 0 );
       generate( d.begin(), d.end(), [&] { return rd(); } );
 
+      // cout << d << endl;
+      // cout << offset << endl;
       for ( auto [off, sz] : seq_size ) {
         sr.execute( Insert { d.substr( off, sz ), off }.is_last( off + sz == offset ) );
+        // cout << "{" << off << ", " << sz << "}" << ", ";
       }
+      // cout << endl;
 
       sr.execute( ReadAll { d } );
     }
