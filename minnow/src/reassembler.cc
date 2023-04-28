@@ -26,8 +26,8 @@ string prettify( string_view str, size_t max_length )
 
 void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writer& output )
 {
-  // cout << "%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-  // cout << "fi:" << fi << ", " << "lid: " << fi + data.size() - 1 << ", size(): " << data.size() << endl;
+  cout << "%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+  cout << "fi:" << fi << ", " << "lid: " << fi + data.size() - 1 << ", size(): " << data.size() << endl;
   if (data.empty())
   {
     if (is_last_substring)
@@ -83,6 +83,11 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
         it = segments_.erase(it);
         if (it == segments_.end() && fi_it == segments_.end()) {
           segments_.push_back({fi, is_last_substring, std::move(data)});
+          break;
+        }
+        if (fi_it == segments_.end() && lid < it->fi)
+        {
+          segments_.insert(it, {fi, is_last_substring, std::move(data)});
           break;
         }
         continue;
@@ -159,20 +164,20 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
     segments_.insert(insert_it, { new_fi, is_last_substring, string{ data, std::get<0>(new_range), std::get<1>(new_range) } });
   }
 
-  // cout << "---------------------" << endl;
-  // for (const auto& seg : segments_)
-  // {
-  //   cout << "seg.fi:" << seg.fi << ", " << "seg.lid: " << seg.fi + seg.data.size() - 1 << ", data.size(): " << seg.data.size() << endl;
-  //   // cout << prettify(seg.data, 2048) << endl;
-  // }
-  // cout << "********************" << endl;
+  cout << "---------------------" << endl;
+  for (const auto& seg : segments_)
+  {
+    cout << "seg.fi:" << seg.fi << ", " << "seg.lid: " << seg.fi + seg.data.size() - 1 << ", data.size(): " << seg.data.size() << endl;
+    // cout << prettify(seg.data, 2048) << endl;
+  }
+  cout << "********************" << endl;
 
   // cout << "%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
   // for (const auto& seg : segments_)
   // {
   //   cout << prettify(seg.data, 2048);
   // }
-  // cout << "￥￥￥￥￥￥￥￥￥￥￥￥￥￥" << endl;
+  cout << "￥￥￥￥￥￥￥￥￥￥￥￥￥￥" << endl;
 
   for (auto it = segments_.begin(); it != segments_.end();)
   {
@@ -190,7 +195,7 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
     it = segments_.erase(it);
   }
 
-  // cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+  cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
 }
 
 uint64_t Reassembler::bytes_pending() const
