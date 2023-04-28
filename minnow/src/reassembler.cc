@@ -26,12 +26,19 @@ string prettify( string_view str, size_t max_length )
 
 void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writer& output )
 {
+  // cout << "%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+  // cout << "fi:" << fi << ", " << "lid: " << fi + data.size() - 1 << ", size(): " << data.size() << endl;
   if (data.empty())
   {
     if (is_last_substring)
     {
       output.close();
     }
+    return;
+  }
+
+  if (output.is_closed())
+  {
     return;
   }
 
@@ -121,6 +128,7 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
 
   auto new_fi = fi;
   tuple<size_t, size_t> new_range{0, 0};
+  auto insert_it = segments_.end();
   if (segments_.empty())
   {
     segments_.push_back({fi, is_last_substring, move(data)});
@@ -128,33 +136,36 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
   else if (fi_it == segments_.end() && lid_it != segments_.end()) 
   {
     new_fi = fi;
+    insert_it = lid_it;
     new_range = {0, lid_it->fi - fi};
   }
   else if (fi_it != segments_.end() && lid_it == segments_.end())
   {
     auto fi_it_lid = fi_it->fi + fi_it->data.size() - 1;
     new_fi = fi_it_lid + 1;
+    insert_it = next(fi_it);
     new_range = {fi_it_lid - fi + 1, data.size() - (fi_it_lid - fi + 1)};
   }
   else if (fi_it != segments_.end() && lid_it != segments_.end())
   {
     auto fi_it_lid = fi_it->fi + fi_it->data.size() - 1;
     new_fi = fi_it_lid + 1;
+    insert_it = lid_it;
     new_range = {fi_it_lid - fi + 1, lid_it->fi - fi_it_lid - 1};
   }
 
   if (std::get<1>(new_range) > 0)
   {
-    segments_.insert(lid_it, { new_fi, is_last_substring, string{ data, std::get<0>(new_range), std::get<1>(new_range) } });
+    segments_.insert(insert_it, { new_fi, is_last_substring, string{ data, std::get<0>(new_range), std::get<1>(new_range) } });
   }
 
-  cout << "---------------------" << endl;
-  for (const auto& seg : segments_)
-  {
-    cout << "seg.fi:" << seg.fi << ", " << "seg.lid: " << seg.fi + seg.data.size() - 1 << ", data.size(): " << seg.data.size() << endl;
-    // cout << prettify(seg.data, 2048) << endl;
-  }
-  cout << "********************" << endl;
+  // cout << "---------------------" << endl;
+  // for (const auto& seg : segments_)
+  // {
+  //   cout << "seg.fi:" << seg.fi << ", " << "seg.lid: " << seg.fi + seg.data.size() - 1 << ", data.size(): " << seg.data.size() << endl;
+  //   // cout << prettify(seg.data, 2048) << endl;
+  // }
+  // cout << "********************" << endl;
 
   // cout << "%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
   // for (const auto& seg : segments_)
@@ -178,6 +189,8 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
     }
     it = segments_.erase(it);
   }
+
+  // cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
 }
 
 uint64_t Reassembler::bytes_pending() const
