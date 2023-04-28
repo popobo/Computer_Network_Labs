@@ -1,33 +1,10 @@
 #include "reassembler.hh"
 #include <tuple>
-#include <cassert>
-#include <iostream>
-#include <iomanip>
-#include <unistd.h>
 
 using namespace std;
 
-string prettify( string_view str, size_t max_length )
-{
-  ostringstream ss;
-  const string_view str_prefix = str.substr( 0, max_length );
-  for ( const uint8_t ch : str_prefix ) {
-    if ( isprint( ch ) ) {
-      ss << ch;
-    } else {
-      ss << "\\x" << fixed << setw( 2 ) << setfill( '0' ) << hex << static_cast<size_t>( ch );
-    }
-  }
-  if ( str.size() > str_prefix.size() ) {
-    ss << "...";
-  }
-  return ss.str();
-}
-
 void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writer& output )
 {
-  // cout << "%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-  // cout << "fi:" << fi << ", " << "lid: " << fi + data.size() - 1 << ", size(): " << data.size() << endl;
   if (data.empty())
   {
     if (is_last_substring)
@@ -83,6 +60,11 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
         it = segments_.erase(it);
         if (it == segments_.end() && fi_it == segments_.end()) {
           segments_.push_back({fi, is_last_substring, std::move(data)});
+          break;
+        }
+        if (fi_it == segments_.end() && lid < it->fi)
+        {
+          segments_.insert(it, {fi, is_last_substring, std::move(data)});
           break;
         }
         continue;
@@ -159,21 +141,6 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
     segments_.insert(insert_it, { new_fi, is_last_substring, string{ data, std::get<0>(new_range), std::get<1>(new_range) } });
   }
 
-  // cout << "---------------------" << endl;
-  // for (const auto& seg : segments_)
-  // {
-  //   cout << "seg.fi:" << seg.fi << ", " << "seg.lid: " << seg.fi + seg.data.size() - 1 << ", data.size(): " << seg.data.size() << endl;
-  //   // cout << prettify(seg.data, 2048) << endl;
-  // }
-  // cout << "********************" << endl;
-
-  // cout << "%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-  // for (const auto& seg : segments_)
-  // {
-  //   cout << prettify(seg.data, 2048);
-  // }
-  // cout << "￥￥￥￥￥￥￥￥￥￥￥￥￥￥" << endl;
-
   for (auto it = segments_.begin(); it != segments_.end();)
   {
     if (it->fi != f_uasm_i_)
@@ -189,8 +156,6 @@ void Reassembler::insert( uint64_t fi, string data, bool is_last_substring, Writ
     }
     it = segments_.erase(it);
   }
-
-  // cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
 }
 
 uint64_t Reassembler::bytes_pending() const
