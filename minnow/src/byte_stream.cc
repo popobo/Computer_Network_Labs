@@ -8,7 +8,7 @@ ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
 
 void Writer::push( string data )
 {
-  const uint64_t push_len = min(data.size(), capacity_ - bytes_.size());
+  const uint64_t push_len = min( data.size(), capacity_ - bytes_.size() );
 
   if ( 0 == push_len ) {
     return;
@@ -60,7 +60,7 @@ bool Reader::has_error() const
 
 void Reader::pop( uint64_t len )
 {
-  const auto pop_len = min(len, bytes_.size());
+  const auto pop_len = min( len, bytes_.size() );
 
   if ( 0 == pop_len ) {
     return;

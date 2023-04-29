@@ -2,8 +2,8 @@
 
 #include "byte_stream.hh"
 
-#include <string>
 #include <list>
+#include <string>
 
 class Reassembler
 {
@@ -34,12 +34,12 @@ public:
   uint64_t bytes_pending() const;
 
 private:
-    struct segment 
-    {
-        uint64_t fi = 0;
-        bool is_last_substring = false;
-        std::string data{};
-    };
-    uint64_t f_uasm_i_ = 0; 
-    std::list<segment> segments_{};
+  struct segment
+  {
+    uint64_t fi = 0;
+    bool is_last_substring = false;
+    std::string data {};
+  };
+  uint64_t f_uasm_i_ = 0;
+  std::list<segment> segments_ {};
 };
