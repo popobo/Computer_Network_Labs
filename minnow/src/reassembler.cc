@@ -16,12 +16,12 @@ void Reassembler::insert( uint64_t fi, std::string data, bool is_last_substring,
   }
 
   // Find first unacceptable index
-  uint64_t f_uacp_i = f_uasm_i_ + output.available_capacity();
+  uint64_t f_uacp_i = output.bytes_pushed() + output.available_capacity();
   // Last index of data
   uint64_t lid = fi + data.size() - 1;
 
   // Discard any bytes that lie beyond the stream's available capacity or are already assembled
-  if ( lid < f_uasm_i_ ) {
+  if ( lid < output.bytes_pushed() ) {
     return;
   }
 
@@ -30,9 +30,9 @@ void Reassembler::insert( uint64_t fi, std::string data, bool is_last_substring,
     lid = f_uacp_i - 1;
   }
 
-  if ( fi < f_uasm_i_ ) {
-    data = data.substr( f_uasm_i_ - fi );
-    fi = f_uasm_i_;
+  if ( fi < output.bytes_pushed() ) {
+    data = data.substr( output.bytes_pushed() - fi );
+    fi = output.bytes_pushed();
   }
 
   if ( data.empty() ) {
@@ -102,9 +102,8 @@ void Reassembler::insert( uint64_t fi, std::string data, bool is_last_substring,
   }
 
   // Write the assembled data to output
-  while ( !segments_.empty() && segments_.front().fi == f_uasm_i_ ) {
+  while ( !segments_.empty() && segments_.front().fi == output.bytes_pushed() ) {
     auto& front_segment = segments_.front();
-    f_uasm_i_ += front_segment.data.size();
     output.push( std::move( front_segment.data ) );
     if ( front_segment.is_last_substring ) {
       output.close();

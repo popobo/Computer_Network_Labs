@@ -40,6 +40,5 @@ private:
     bool is_last_substring = false;
     std::string data {};
   };
-  uint64_t f_uasm_i_ = 0;
   std::list<segment> segments_ {};
 };
