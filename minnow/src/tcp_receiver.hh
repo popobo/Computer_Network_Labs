@@ -15,4 +15,10 @@ public:
 
   /* The TCPReceiver sends TCPReceiverMessages back to the TCPSender. */
   TCPReceiverMessage send( const Writer& inbound_stream ) const;
+
+private:
+  Wrap32 ISN_ { 0 };
+  bool is_isn_set_ { false };
+  uint64_t FIN_ackno { 0 };
+  bool is_fin_set_ { false };
 };
