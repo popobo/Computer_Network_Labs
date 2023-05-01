@@ -21,11 +21,12 @@ void Reassembler::insert( uint64_t fi, std::string data, bool is_last_substring,
   uint64_t lid = fi + data.size() - 1;
 
   // Discard any bytes that lie beyond the stream's available capacity or are already assembled
-  if ( lid < output.bytes_pushed() ) {
+  if ( lid < output.bytes_pushed() || fi > f_uacp_i) {
     return;
   }
 
   if ( lid >= f_uacp_i ) {
+    
     data.resize( f_uacp_i - fi );
     lid = f_uacp_i - 1;
   }
