@@ -3,11 +3,17 @@
 #include "byte_stream.hh"
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
+#include <list>
 
 class TCPSender
 {
-  Wrap32 isn_;
-  uint64_t initial_RTO_ms_;
+  Wrap32 isn_ { 0 };
+  uint64_t initial_RTO_ms_ { 0 };
+  uint64_t current_ackno_ { 0 };
+  uint64_t num_seq_has_sent_ { 0 };
+  TCPReceiverMessage cur_rec_msg_ { std::optional<Wrap32>{0}, 0};
+
+  std::list<TCPSenderMessage> se_msgs_ {};
 
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */

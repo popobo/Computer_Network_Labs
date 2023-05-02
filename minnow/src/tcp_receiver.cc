@@ -13,7 +13,7 @@ void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, W
 
   auto ab_fi = message.seqno.unwrap( ISN_, inbound_stream.bytes_pushed() ); // fi is a absolute seqno
 
-  if ( !is_isn_set_ || (!message.SYN && ab_fi == 0)) {
+  if ( !is_isn_set_ || ( !message.SYN && ab_fi == 0 ) ) {
     return;
   }
 
